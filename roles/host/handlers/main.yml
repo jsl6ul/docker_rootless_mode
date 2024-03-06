@@ -1,0 +1,20 @@
+---
+- name: Systemctl daemon-reload
+  ansible.builtin.command: systemctl daemon-reload
+  changed_when: false
+
+- name: Update grub RedHat
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  when: ansible_os_family == 'RedHat'
+  listen: Update grub
+  changed_when: false
+
+- name: Update grub Debian
+  ansible.builtin.command: /usr/sbin/update-grub
+  when: ansible_os_family == 'Debian'
+  listen: Update grub
+  changed_when: false
+
+- name: Reboot host
+  reboot:
+  when: docker_host_reboot

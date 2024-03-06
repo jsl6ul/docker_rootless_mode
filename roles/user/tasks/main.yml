@@ -1,0 +1,45 @@
+---
+- name: "Check if rootless docker has already been setup"
+  ansible.builtin.stat:
+    path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service"
+  register: docker_user_set
+
+- name: "Run dockerd-rootless-setuptool.sh"
+  ansible.builtin.command: dockerd-rootless-setuptool.sh install
+  when: not docker_user_set.stat.exists
+  changed_when: false
+
+# - install python module for docker_compose using pip (ie. not available in debian)
+# - this module is required by ansible to manage docker tasks
+# - install locally (in `docker_rootless_user.home`) to avoid conflicts with the host.
+
+- name: "Create ~/.config/pip/ directory"
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/pip/"
+    state: directory
+
+- name: "Create pip.conf to install pip packages"
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.config/pip/pip.conf"
+    content: |
+      [global]
+      break-system-packages = true
+
+- name: "Create pip_constraint.txt file"
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.config/pip/pip_constraint.txt"
+    content: |
+      cython<3
+
+- name: "Check if docker-compose has already been installed"
+  ansible.builtin.shell: |
+    pip show docker-compose > /dev/null
+  register: _pip_dc_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: "Pip install docker-compose"
+  ansible.builtin.shell: |
+    PIP_CONSTRAINT={{ docker_rootless_user.home }}/.config/pip/pip_constraint.txt pip install --user docker-compose
+  when: _pip_dc_installed.rc != 0
+  changed_when: false

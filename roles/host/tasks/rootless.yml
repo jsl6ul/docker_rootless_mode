@@ -1,0 +1,96 @@
+---
+- name: "Rootless : disable system-wide docker service"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  with_items:
+    - docker.service
+    - docker.socket
+
+- name: "Rootless : install docker rootless requirements"
+  ansible.builtin.package:
+    name:
+      - uidmap
+      - dbus-user-session
+      - docker-ce-rootless-extras
+      - fuse-overlayfs
+
+- name: "Rootless : add docker user for rootless mode"
+  ansible.builtin.user:
+    name: "{{ docker_rootless_user.name }}"
+    state: present
+    home: "{{ docker_rootless_user.home }}"
+    password: "{{ docker_rootless_user.pwhash }}"
+    uid: "{{ docker_rootless_user.uid }}"
+    shell: "{{ docker_rootless_user.shell }}"
+  no_log: true
+
+- name: "Rootless : create docker user ssh directory"
+  file:
+    dest: "{{ docker_rootless_user.home }}/.ssh"
+    owner: "{{ docker_rootless_user.name }}"
+    mode: 0700
+    state: directory
+  when: docker_rootless_user.authorized_keys is defined
+
+- name: "Rootless : set ssh authorized keys"
+  copy:
+    dest: "{{ docker_rootless_user.home }}/.ssh/authorized_keys"
+    owner: "{{ docker_rootless_user.name }}"
+    mode: 0600
+    content: "{{ docker_rootless_user.authorized_keys }}"
+  when: docker_rootless_user.authorized_keys is defined
+
+- name: "Rootless : chmod on home directory"
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}"
+    mode: "0750"
+
+- name: "Rootless : setup .bashrc for docker user"
+  ansible.builtin.lineinfile:
+    path: "{{ docker_rootless_user.home }}/.bashrc"
+    regexp: "{{ item.re }}"
+    line: "{{ item.line }}"
+    insertbefore: BOF
+  with_items:
+    - { re: ^umask.*, line: umask 0002 }
+    - { re: ^export PATH, line: "export PATH=/usr/bin:{{ docker_rootless_user.home }}/.local/bin:$PATH" }
+    - { re: ^export DOCKER_HOST, line: "export DOCKER_HOST=unix:///run/user/{{ docker_rootless_user.uid }}/docker.sock" }
+
+- name: "Rootless : increase user limits for {{ docker_rootless_user.name }}"
+  community.general.pam_limits:
+    domain: "{{ docker_rootless_user.name }}"
+    limit_item: "{{ item.key }}"
+    limit_type: "{{ item.type }}"
+    value: "{{ item.val }}"
+  with_items:
+    - { key: nofile, type: "-", val: 65536 }
+    - { key: memlock, type: "-", val: unlimited }
+
+- name: "Rootless : enable linger for {{ docker_rootless_user.name }}"
+  ansible.builtin.copy:
+    dest: /var/lib/systemd/linger/{{ docker_rootless_user.name }}
+    content: ""
+
+- name: "Rootless : set capabilities on rootlesskit"
+  community.general.capabilities:
+    path: /usr/bin/rootlesskit
+    capability: "{{ item }}"
+    state: present
+  with_items:
+    - cap_net_bind_service=ep
+    - cap_sys_resource=ep
+
+- name: "Rootless : create systemd directory for {{ docker_rootless_user.name }}"
+  ansible.builtin.file:
+    path: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d
+    state: directory
+
+- name: "Rootless : add systemd files for limiting resources by {{ docker_rootless_user.name }}"
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d/delegate.conf
+    content: |
+      [Service]
+      Delegate=cpu cpuset io memory pids
+  notify: Systemctl daemon-reload

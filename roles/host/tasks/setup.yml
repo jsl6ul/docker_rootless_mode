@@ -1,0 +1,20 @@
+---
+- name: "Setup : disable cgroup v2"
+  ansible.builtin.copy:
+    dest: /etc/default/grub.d/cgroupv2.cfg
+    content: |
+      # disable cgroup v2
+      GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT systemd.unified_cgroup_hierarchy=0"
+  notify:
+    - Update grub
+    - Reboot host
+  when: not docker_rootless_cgroupv2
+
+- name: "Setup : enable cgroup v2"
+  ansible.builtin.file:
+    path: /etc/default/grub.d/cgroupv2.cfg
+    state: absent
+  notify:
+    - Update grub
+    - Reboot host
+  when: docker_rootless_cgroupv2

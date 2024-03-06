@@ -1,0 +1,40 @@
+---
+- name: "Debian : uninstall distro packages"
+  ansible.builtin.package:
+    state: absent
+    name:
+      - containerd
+      - docker-compose
+      - docker-doc
+      - docker.io
+      - podman-docker
+      - runc
+
+- name: "Debian : install requirements"
+  ansible.builtin.package:
+    name:
+      - python3-docker
+      - python3-pip
+      - curl
+
+- name: "Debian : make sure /etc/apt/keyrings/ is there"
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/
+    state: directory
+
+- name: "Debian : install docker repository key"
+  ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-ce.gpg
+  args:
+    creates: /etc/apt/keyrings/docker-ce.gpg
+  register: _gpg_key
+
+- name: "Debian : install docker repository"
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/etc/apt/keyrings/docker-ce.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker-ce
+
+- name: "Debian : apt-get update"
+  ansible.builtin.command: apt-get update
+  when: _gpg_key.changed
+  changed_when: false
