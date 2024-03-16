@@ -17,4 +17,4 @@
 
 - name: Reboot host
   reboot:
-  when: docker_host_reboot
+  when: docker_rootless_reboot
