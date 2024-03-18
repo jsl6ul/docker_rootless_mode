@@ -9,7 +9,7 @@
   when: not docker_user_set.stat.exists
   changed_when: false
 
-# - install python module for docker_compose using pip (ie. not available in debian 12)
+# - install python module for docker_compose using pip
 # - this module is required by ansible to manage docker tasks
 # - install locally (in `docker_rootless_user.home`) to avoid conflicts with the host.
 
@@ -18,20 +18,20 @@
     path: "{{ docker_rootless_user.home }}/.config/pip/"
     state: directory
 
-- name: "Create pip.conf to install pip packages"
+- name: "Create ~/.config/pip/pip.conf"
   ansible.builtin.copy:
     dest: "{{ docker_rootless_user.home }}/.config/pip/pip.conf"
     content: |
       [global]
       break-system-packages = true
 
-- name: "Create pip_constraint.txt file"
+- name: "Create pip_constraint.txt for cython<3"
   ansible.builtin.copy:
     dest: "{{ docker_rootless_user.home }}/.config/pip/pip_constraint.txt"
     content: |
       cython<3
 
-- name: "Create pip requirements.txt"
+- name: "Create pip ~/requirements.txt"
   ansible.builtin.copy:
     dest: "{{ docker_rootless_user.home }}/requirements.txt"
     content: "{{ docker_rootless_python_requirements }}"
