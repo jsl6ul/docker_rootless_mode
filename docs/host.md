@@ -2,7 +2,7 @@
 
 based on https://docs.docker.com/engine/security/rootless/
 
-Tested with Debian 11, Debian 12 and Ubuntu 22.04.
+Tested with Debian 11, Debian 12.
 
 This role makes changes to limits and capabilities/cgroups, you should reboot the host after the initial setup.
 

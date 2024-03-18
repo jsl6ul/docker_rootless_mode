@@ -16,6 +16,7 @@
       - python3-docker
       - python3-pip
       - curl
+      - python3-pexpect
 
 - name: "Debian : make sure /etc/apt/keyrings/ is there"
   ansible.builtin.file:
