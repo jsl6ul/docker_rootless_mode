@@ -13,8 +13,8 @@
 - name: "Ubuntu : install requirements"
   ansible.builtin.package:
     name:
-      - python3-docker
-      - python3-pip
+#      - python3-docker
+#      - python3-pip
       - curl
       - python3-pexpect
 
