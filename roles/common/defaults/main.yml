@@ -6,8 +6,7 @@
 #   home: /opt/dockuser
 #   shell: /usr/bin/bash
 #   uid: 2222
-#   pw: < password for reference only, not required by the role >
-#   pwhash: < the password hash used by ansible.builtin.user >
+#   pwhash: < the password hash >
 #   authorized_keys: |
-#     pubkey1 set SSH authorized keys
-#     pubkey2 for this account
+#     pubkey1  add the SSH keys authorized
+#     pubkey2  to access this account
