@@ -1,6 +1,0 @@
----
-
-# # python requirements for docker
-# docker_rootless_python_requirements: |
-#   docker==5.0.3
-#   docker-compose==1.29.2

@@ -13,8 +13,6 @@
 - name: "Ubuntu : install requirements"
   ansible.builtin.package:
     name:
-#      - python3-docker
-#      - python3-pip
       - curl
       - python3-pexpect
 
@@ -39,7 +37,3 @@
   ansible.builtin.command: apt-get update
   when: _gpg_key.changed
   changed_when: false
-
-#- name: "Ubuntu : install pip docker-compose, required by ansible"
-#  ansible.builtin.pip:
-#    name: docker-compose
