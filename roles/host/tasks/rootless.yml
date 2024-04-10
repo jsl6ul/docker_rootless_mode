@@ -81,6 +81,7 @@
   with_items:
     - cap_net_bind_service=ep
     - cap_sys_resource=ep
+  notify: Restart rootless docker
 
 - name: "Rootless : create systemd directory for {{ docker_rootless_user.name }}"
   ansible.builtin.file:

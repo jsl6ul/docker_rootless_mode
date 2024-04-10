@@ -1,0 +1,7 @@
+---
+- name: Restart rootless docker
+  ansible.builtin.command: systemctl --user try-restart docker
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ docker_rootless_user.uid }}"
+  become: yes
+  become_user: "{{ docker_rootless_user.name }}"
