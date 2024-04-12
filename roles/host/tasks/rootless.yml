@@ -78,9 +78,7 @@
     path: /usr/bin/rootlesskit
     capability: "{{ item }}"
     state: present
-  with_items:
-    - cap_net_bind_service=ep
-    - cap_sys_resource=ep
+  with_items: "{{ docker_rootless_capabilities }}"
   notify: Restart rootless docker
 
 - name: "Rootless : create systemd directory for {{ docker_rootless_user.name }}"
@@ -88,10 +86,9 @@
     path: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d
     state: directory
 
-- name: "Rootless : add systemd files for limiting resources by {{ docker_rootless_user.name }}"
+- name: "Rootless : set systemd delegate.conf for limiting resources by {{ docker_rootless_user.name }}"
   ansible.builtin.copy:
     dest: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d/delegate.conf
-    content: |
-      [Service]
-      Delegate=cpu cpuset io memory pids
+    content: "{{ docker_rootless_systemd_delegate_conf }}"
   notify: Systemctl daemon-reload
+  when: docker_rootless_systemd_delegate_conf is defined
