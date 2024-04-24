@@ -15,6 +15,7 @@
       - dbus-user-session
       - docker-ce-rootless-extras
       - fuse-overlayfs
+      - slirp4netns
 
 - name: "Rootless : add docker user for rootless mode"
   ansible.builtin.user:
@@ -57,6 +58,7 @@
     - { re: ^umask.*, line: umask 0002 }
     - { re: ^export PATH, line: "export PATH=/usr/bin:{{ docker_rootless_user.home }}/.local/bin:$PATH" }
     - { re: ^export DOCKER_HOST, line: "export DOCKER_HOST=unix:///run/user/{{ docker_rootless_user.uid }}/docker.sock" }
+    - { re: ^export XDG_RUNTIME_DIR, line: "export XDG_RUNTIME_DIR=/run/user/{{ docker_rootless_user.uid }}" }
 
 - name: "Rootless : increase user limits for {{ docker_rootless_user.name }}"
   community.general.pam_limits:

@@ -1,10 +1,4 @@
 ---
-- name: "Check if rootless docker has already been setup"
-  ansible.builtin.stat:
-    path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service"
-  register: docker_user_set
-
 - name: "Run dockerd-rootless-setuptool.sh"
   ansible.builtin.command: dockerd-rootless-setuptool.sh install
-  when: not docker_user_set.stat.exists
   changed_when: false
