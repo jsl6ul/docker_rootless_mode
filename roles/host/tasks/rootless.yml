@@ -59,6 +59,7 @@
     - { re: ^export PATH, line: "export PATH=/usr/bin:{{ docker_rootless_user.home }}/.local/bin:$PATH" }
     - { re: ^export DOCKER_HOST, line: "export DOCKER_HOST=unix:///run/user/{{ docker_rootless_user.uid }}/docker.sock" }
     - { re: ^export XDG_RUNTIME_DIR, line: "export XDG_RUNTIME_DIR=/run/user/{{ docker_rootless_user.uid }}" }
+    - { re: ^export DBUS_SESSION_BUS_ADDRESS, line: "export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR}/bus" }
 
 - name: "Rootless : increase user limits for {{ docker_rootless_user.name }}"
   community.general.pam_limits:

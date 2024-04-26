@@ -5,3 +5,7 @@
     XDG_RUNTIME_DIR: "/run/user/{{ docker_rootless_user.uid }}"
   become: yes
   become_user: "{{ docker_rootless_user.name }}"
+  register: _reg_rrd
+  failed_when:
+    - _reg_rrd.rc != 0
+    - '"Failed to connect to bus: No such file or directory" not in _reg_rrd.stderr'
