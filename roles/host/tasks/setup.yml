@@ -18,3 +18,9 @@
     - Update grub
     - Reboot host
   when: docker_rootless_cgroupv2
+
+- name: Make sure ip_tables module is present for dockerd-rootless-setuptool.sh
+  community.general.modprobe:
+    name: ip_tables
+    state: present
+    persistent: present

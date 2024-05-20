@@ -1,4 +1,4 @@
 ---
 - name: "Run dockerd-rootless-setuptool.sh"
-  ansible.builtin.command: dockerd-rootless-setuptool.sh install
+  ansible.builtin.command: dockerd-rootless-setuptool.sh {{ docker_rootless_setuptool_options }}
   changed_when: false
