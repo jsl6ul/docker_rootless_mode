@@ -15,3 +15,6 @@ docker_rootless_capabilities:
 docker_rootless_systemd_delegate_conf: |
   [Service]
   Delegate=cpu cpuset io memory pids
+
+# This must be “true” with Debian 11
+docker_rootless_modprobe_iptables: false
