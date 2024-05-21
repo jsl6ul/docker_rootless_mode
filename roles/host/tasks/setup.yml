@@ -24,3 +24,4 @@
     name: ip_tables
     state: present
     persistent: present
+  when: docker_rootless_modprobe_iptables
