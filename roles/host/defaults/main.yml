@@ -7,8 +7,8 @@ docker_rootless_reboot: false
 
 # capabilities on rootlesskit
 docker_rootless_capabilities:
-  - cap_net_bind_service=ep  # Exposing privileged ports
-  - cap_sys_resource=ep      # Limiting resources
+  - cap_net_bind_service=ep # Exposing privileged ports
+  - cap_sys_resource=ep # Limiting resources
 
 # Limiting resources with systemd as Cgroup Driver
 # https://docs.docker.com/engine/security/rootless/#limiting-resources

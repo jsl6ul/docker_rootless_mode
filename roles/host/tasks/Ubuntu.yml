@@ -22,7 +22,9 @@
     state: directory
 
 - name: "Ubuntu : install docker repository key"
-  ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-ce.gpg
+  ansible.builtin.shell:
+    cmd: set -o pipefail && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-ce.gpg
+    executable: /bin/bash
   args:
     creates: /etc/apt/keyrings/docker-ce.gpg
   register: _gpg_key
