@@ -43,3 +43,28 @@
     content: "{{ docker_rootless_config_json }}"
   when: docker_rootless_config_json is defined
   notify: Restart rootless docker
+
+- name: Create ~/.config/docker directory
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/docker/"
+    mode: "0755"
+    state: directory
+  when: docker_rootless_daemon_json is defined
+
+- name: Create ~/.config/docker/daemon.json
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.config/docker/daemon.json"
+    mode: "0644"
+    content: "{{ docker_rootless_daemon_json }}"
+  when: docker_rootless_daemon_json is defined
+  notify: Restart rootless docker
+
+- name: Delete ~/.config/docker/daemon.json
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/docker/daemon.json"
+    state: absent
+  when: docker_rootless_daemon_json is not defined
+  notify: Restart rootless docker
+
+- name: Flush handlers
+  meta: flush_handlers

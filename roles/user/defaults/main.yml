@@ -22,3 +22,10 @@ docker_rootless_setuptool_options: install
 #       }
 #     }
 #   }
+
+# To customize the Docker daemon using ~/.config/docker/daemon.json
+# docker_rootless_daemon_json: |
+#   {
+#     "bip": "192.168.0.1/24",
+#     "default-address-pools":[{"base":"192.168.1.0/24","size":24}]
+#   }
