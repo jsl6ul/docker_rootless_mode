@@ -1,3 +1,31 @@
 ---
 # Options for the 'dockerd-rootless-setuptool.sh' command
 docker_rootless_setuptool_options: install
+
+# To override or configure systemd docker services
+# docker_rootless_systemd_override: |
+#   [Service]
+#   Environment="http_proxy=http://192.168.0.100:3128"
+#   Environment="https_proxy=http://192.168.0.100:3128"
+#   Environment="no_proxy=127.0.0.1,localhost"
+
+# To override the ~/.docker/config.json file
+# docker_rootless_config_json: |
+#   {
+#     "auths": {},
+#     "currentContext": "rootless",
+#     "proxies": {
+#       "default": {
+#         "httpProxy": "http://192.168.0.100:3128",
+#         "httpsProxy": "http://192.168.0.100:3128",
+#         "noProxy": "localhost,127.0.0.1"
+#       }
+#     }
+#   }
+
+# To customize the Docker daemon using ~/.config/docker/daemon.json
+# docker_rootless_daemon_json: |
+#   {
+#     "bip": "192.168.0.1/24",
+#     "default-address-pools":[{"base":"192.168.1.0/24","size":24}]
+#   }

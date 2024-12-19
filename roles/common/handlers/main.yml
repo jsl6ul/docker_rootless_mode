@@ -1,4 +1,16 @@
 ---
+- name: Systemd daemon-reload
+  ansible.builtin.command: systemctl --user daemon-reload
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ docker_rootless_user.uid }}
+  become: true
+  become_user: "{{ docker_rootless_user.name }}"
+  register: _reg_rrd
+  failed_when:
+    - _reg_rrd.rc != 0
+    - '"Failed to connect to bus: No such file or directory" not in _reg_rrd.stderr'
+  changed_when: false
+
 - name: Restart rootless docker
   ansible.builtin.command: systemctl --user try-restart docker
   environment:

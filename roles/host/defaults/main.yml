@@ -2,6 +2,9 @@
 # cgroup v2 is enabled by default, set this to false to force cgroup v1.
 docker_rootless_cgroupv2: true
 
+# delete docker0 network interface on the host
+docker_rootless_delete_docker0_network_interface: true
+
 # authorize the role to restart the host
 docker_rootless_reboot: false
 

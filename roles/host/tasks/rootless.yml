@@ -95,3 +95,8 @@
     content: "{{ docker_rootless_systemd_delegate_conf }}"
   notify: Systemctl daemon-reload
   when: docker_rootless_systemd_delegate_conf is defined
+
+- name: "Rootless : remove docker0 network interface"
+  ansible.builtin.shell: if `test -d /sys/class/net/docker0`; then ip link delete docker0; fi
+  changed_when: false
+  when: docker_rootless_delete_docker0_network_interface

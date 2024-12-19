@@ -2,3 +2,69 @@
 - name: Run dockerd-rootless-setuptool.sh
   ansible.builtin.command: dockerd-rootless-setuptool.sh {{ docker_rootless_setuptool_options }}
   changed_when: false
+
+- name: Create docker.service.d directory
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service.d/"
+    mode: "0755"
+    state: directory
+  when: docker_rootless_systemd_override is defined
+
+- name: Create docker.service.d/override.conf
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service.d/override.conf"
+    mode: "0644"
+    content: "{{ docker_rootless_systemd_override }}"
+  when: docker_rootless_systemd_override is defined
+  notify:
+    - Systemd daemon-reload
+    - Restart rootless docker
+
+- name: Delete docker.service.d/override.conf
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service.d/override.conf"
+    state: absent
+  when: docker_rootless_systemd_override is not defined
+  notify:
+    - Systemd daemon-reload
+    - Restart rootless docker
+
+- name: Delete docker.service.d
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service.d"
+    state: absent
+  when: docker_rootless_systemd_override is not defined
+  notify: Restart rootless docker
+
+- name: Overwrite ~/.docker/config.json
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.docker/config.json"
+    mode: "0600"
+    content: "{{ docker_rootless_config_json }}"
+  when: docker_rootless_config_json is defined
+  notify: Restart rootless docker
+
+- name: Create ~/.config/docker directory
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/docker/"
+    mode: "0755"
+    state: directory
+  when: docker_rootless_daemon_json is defined
+
+- name: Create ~/.config/docker/daemon.json
+  ansible.builtin.copy:
+    dest: "{{ docker_rootless_user.home }}/.config/docker/daemon.json"
+    mode: "0644"
+    content: "{{ docker_rootless_daemon_json }}"
+  when: docker_rootless_daemon_json is defined
+  notify: Restart rootless docker
+
+- name: Delete ~/.config/docker/daemon.json
+  ansible.builtin.file:
+    path: "{{ docker_rootless_user.home }}/.config/docker/daemon.json"
+    state: absent
+  when: docker_rootless_daemon_json is not defined
+  notify: Restart rootless docker
+
+- name: Flush handlers
+  meta: flush_handlers
