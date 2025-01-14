@@ -1,5 +1,5 @@
 ---
-- name: "Rootless : disable system-wide docker service"
+- name: "Rootless : stop & disable system-wide docker service"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: false
@@ -7,6 +7,11 @@
   with_items:
     - docker.service
     - docker.socket
+
+- name: "Rootless : remove docker0 network interface"
+  ansible.builtin.shell: if `test -d /sys/class/net/docker0`; then ip link delete docker0; fi
+  changed_when: false
+  when: docker_rootless_delete_docker0_network_interface
 
 - name: "Rootless : install docker rootless requirements"
   ansible.builtin.package:
@@ -61,7 +66,7 @@
     - { re: ^export XDG_RUNTIME_DIR, line: "export XDG_RUNTIME_DIR=/run/user/{{ docker_rootless_user.uid }}" }
     - { re: ^export DBUS_SESSION_BUS_ADDRESS, line: "export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR}/bus" }
 
-- name: "Rootless : increase user limits for {{ docker_rootless_user.name }}"
+- name: "Rootless : increase user limits for docker user"
   community.general.pam_limits:
     domain: "{{ docker_rootless_user.name }}"
     limit_item: "{{ item.key }}"
@@ -71,7 +76,7 @@
     - { key: nofile, type: "-", val: 65536 }
     - { key: memlock, type: "-", val: unlimited }
 
-- name: "Rootless : enable linger for {{ docker_rootless_user.name }}"
+- name: "Rootless : enable linger for docker user"
   ansible.builtin.copy:
     dest: /var/lib/systemd/linger/{{ docker_rootless_user.name }}
     content: ""
@@ -84,19 +89,14 @@
   with_items: "{{ docker_rootless_capabilities }}"
   notify: Restart rootless docker
 
-- name: "Rootless : create systemd directory for {{ docker_rootless_user.name }}"
+- name: "Rootless : create systemd directory for docker user"
   ansible.builtin.file:
     path: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d
     state: directory
 
-- name: "Rootless : set systemd delegate.conf for limiting resources by {{ docker_rootless_user.name }}"
+- name: "Rootless : set systemd delegate.conf for limiting resources to docker user"
   ansible.builtin.copy:
     dest: /etc/systemd/system/{{ docker_rootless_user.name }}@.service.d/delegate.conf
     content: "{{ docker_rootless_systemd_delegate_conf }}"
   notify: Systemctl daemon-reload
   when: docker_rootless_systemd_delegate_conf is defined
-
-- name: "Rootless : remove docker0 network interface"
-  ansible.builtin.shell: if `test -d /sys/class/net/docker0`; then ip link delete docker0; fi
-  changed_when: false
-  when: docker_rootless_delete_docker0_network_interface
