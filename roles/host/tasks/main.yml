@@ -1,6 +1,6 @@
 ---
-- name: Import tasks for {{ ansible_distribution }}
-  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yml"
+- name: Import tasks for {{ ansible_os_family }}
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
 - name: Import tasks for docker ce
   ansible.builtin.import_tasks: docker-ce.yml
 - name: Import setup tasks
