@@ -31,7 +31,7 @@
 
 - name: "Debian : install docker repository"
   ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/docker-ce.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+    repo: "{{ docker_ce_sources_list }}"
     state: present
     filename: docker-ce
 
