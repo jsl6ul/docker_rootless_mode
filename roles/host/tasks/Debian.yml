@@ -36,12 +36,15 @@
   register: _gpg_key
 
 - name: "Debian : install docker repository"
-  ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/docker-ce.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
-    state: present
-    filename: docker-ce
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker-ce.list
+    content: "{{ docker_ce_sources_list }}"
+    mode: "0644"
+    owner: root
+    group: root
+  register: _repository
 
 - name: "Debian : apt-get update"
   ansible.builtin.command: apt-get update
-  when: _gpg_key.changed
+  when: _gpg_key.changed or _repository.changed
   changed_when: false
