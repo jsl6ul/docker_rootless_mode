@@ -21,3 +21,6 @@ docker_rootless_systemd_delegate_conf: |
 
 # This must be “true” with Debian 11
 docker_rootless_modprobe_iptables: false
+
+# Use podman as the container runtime instead of docker.
+docker_rootless_podman: false

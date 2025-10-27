@@ -16,6 +16,12 @@
       - curl
       - python3-pexpect
 
+- name: "Ubuntu : install podman"
+  ansible.builtin.package:
+    name:
+      - podman
+  when: docker_rootless_podman
+
 - name: "Ubuntu : make sure /etc/apt/keyrings/ is there"
   ansible.builtin.file:
     path: /etc/apt/keyrings/
