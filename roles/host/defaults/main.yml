@@ -1,5 +1,5 @@
 ---
-docker_ce_reposity_key_url: "https://download.docker.com/linux/debian/gpg"
+docker_ce_reposity_key_url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
 docker_ce_sources_list: "deb [signed-by=/etc/apt/keyrings/docker-ce.gpg] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
 
 # cgroup v2 is enabled by default, set this to false to force cgroup v1.
