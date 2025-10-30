@@ -1,5 +1,5 @@
 ---
-- name: "Debian : uninstall distro packages"
+- name: Uninstall distro packages
   ansible.builtin.package:
     state: absent
     name:
@@ -10,26 +10,32 @@
       - podman-docker
       - runc
 
-- name: "Debian : install requirements"
+- name: Install requirements
   ansible.builtin.package:
     name:
       - curl
       - python3-pexpect
 
-- name: "Debian : make sure /etc/apt/keyrings/ is there"
+- name: Make sure /etc/apt/keyrings/ is there
   ansible.builtin.file:
     path: /etc/apt/keyrings/
     state: directory
 
-- name: "Debian : install docker repository key"
+- name: Delete repository key
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker-ce.gpg
+    state: absent
+  when: reinstall_repository_key is defined and reinstall_repository_key
+
+- name: Install docker repository key (-e reinstall_repository_key=true)
   ansible.builtin.shell:
-    cmd: set -o pipefail && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-ce.gpg
+    cmd: set -o pipefail && curl -fsSL {{ docker_ce_reposity_key_url }} | gpg --dearmor -o /etc/apt/keyrings/docker-ce.gpg
     executable: /bin/bash
   args:
     creates: /etc/apt/keyrings/docker-ce.gpg
   register: _gpg_key
 
-- name: "Debian : install docker repository"
+- name: Install docker repository
   ansible.builtin.copy:
     dest: /etc/apt/sources.list.d/docker-ce.list
     content: "{{ docker_ce_sources_list }}"
@@ -38,7 +44,7 @@
     group: root
   register: _repository
 
-- name: "Debian : apt-get update"
+- name: Apt update
   ansible.builtin.command: apt-get update
   when: _gpg_key.changed or _repository.changed
   changed_when: false
