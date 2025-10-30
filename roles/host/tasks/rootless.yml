@@ -84,8 +84,8 @@
 - name: "Rootless : set capabilities on rootlesskit"
   community.general.capabilities:
     path: /usr/bin/rootlesskit
-    capability: "{{ item }}"
-    state: present
+    capability: "{{ item.cap }}"
+    state: "{{ item.state | default('present') }}"
   with_items: "{{ docker_rootless_capabilities }}"
   notify: Restart rootless docker
 
