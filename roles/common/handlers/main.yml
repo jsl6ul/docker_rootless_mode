@@ -11,6 +11,26 @@
     - '"Failed to connect to bus: No such file or directory" not in _reg_rrd.stderr'
   changed_when: false
 
+- name: Stop and disable rootless docker
+  ansible.builtin.command: systemctl --user disable --now docker
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ docker_rootless_user.uid }}
+  become: true
+  become_user: "{{ docker_rootless_user.name }}"
+  changed_when: false
+  when: docker_rootless_podman
+  listen: Restart rootless container runtime
+
+- name: Stop and disable rootless podman
+  ansible.builtin.command: systemctl --user disable --now podman.socket
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ docker_rootless_user.uid }}
+  become: true
+  become_user: "{{ docker_rootless_user.name }}"
+  changed_when: false
+  when: not docker_rootless_podman
+  listen: Restart rootless container runtime
+
 - name: Restart rootless docker
   ansible.builtin.command: systemctl --user try-restart docker
   environment:
@@ -22,3 +42,19 @@
     - _reg_rrd.rc != 0
     - '"Failed to connect to bus: No such file or directory" not in _reg_rrd.stderr'
   changed_when: false
+  when: not docker_rootless_podman
+  listen: Restart rootless container runtime
+
+- name: Restart rootless podman
+  ansible.builtin.command: systemctl --user try-restart podman.socket
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ docker_rootless_user.uid }}
+  become: true
+  become_user: "{{ docker_rootless_user.name }}"
+  register: _reg_rrp
+  failed_when:
+    - _reg_rrp.rc != 0
+    - '"Failed to connect to bus: No such file or directory" not in _reg_rrp.stderr'
+  changed_when: false
+  when: docker_rootless_podman
+  listen: Restart rootless container runtime
