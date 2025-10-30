@@ -62,7 +62,7 @@
   with_items:
     - { re: ^umask.*, line: umask 0002 }
     - { re: ^export PATH, line: "export PATH=/usr/bin:{{ docker_rootless_user.home }}/.local/bin:$PATH" }
-    - { re: ^export DOCKER_HOST, line: "export DOCKER_HOST=unix:///run/user/{{ docker_rootless_user.uid }}/docker.sock" }
+    - { re: ^export DOCKER_HOST, line: "export DOCKER_HOST={{ docker_rootless_sock_path }}" }
     - { re: ^export XDG_RUNTIME_DIR, line: "export XDG_RUNTIME_DIR=/run/user/{{ docker_rootless_user.uid }}" }
     - { re: ^export DBUS_SESSION_BUS_ADDRESS, line: "export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR}/bus" }
 
@@ -87,7 +87,7 @@
     capability: "{{ item }}"
     state: present
   with_items: "{{ docker_rootless_capabilities }}"
-  notify: Restart rootless docker
+  notify: Restart rootless container runtime
 
 - name: "Rootless : create systemd directory for docker user"
   ansible.builtin.file:
