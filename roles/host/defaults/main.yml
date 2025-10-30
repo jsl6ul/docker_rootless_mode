@@ -23,3 +23,6 @@ docker_rootless_systemd_delegate_conf: |
 
 # This must be “true” with Debian 11
 docker_rootless_modprobe_iptables: false
+
+# Path to docker or podman socket
+docker_rootless_sock_path: "{{ docker_rootless_podman | ternary('unix:///run/user/' + docker_rootless_user.uid | string + '/podman/podman.sock', 'unix:///run/user/' + docker_rootless_user.uid | string + '/docker.sock') }}"

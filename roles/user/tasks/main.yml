@@ -18,7 +18,7 @@
   when: docker_rootless_systemd_override is defined
   notify:
     - Systemd daemon-reload
-    - Restart rootless docker
+    - Restart rootless container runtime
 
 - name: Delete docker.service.d/override.conf
   ansible.builtin.file:
@@ -27,14 +27,14 @@
   when: docker_rootless_systemd_override is not defined
   notify:
     - Systemd daemon-reload
-    - Restart rootless docker
+    - Restart rootless container runtime
 
 - name: Delete docker.service.d
   ansible.builtin.file:
     path: "{{ docker_rootless_user.home }}/.config/systemd/user/docker.service.d"
     state: absent
   when: docker_rootless_systemd_override is not defined
-  notify: Restart rootless docker
+  notify: Restart rootless container runtime
 
 - name: Overwrite ~/.docker/config.json
   ansible.builtin.copy:
@@ -42,7 +42,7 @@
     mode: "0600"
     content: "{{ docker_rootless_config_json }}"
   when: docker_rootless_config_json is defined
-  notify: Restart rootless docker
+  notify: Restart rootless container runtime
 
 - name: Create ~/.config/docker directory
   ansible.builtin.file:
@@ -57,14 +57,14 @@
     mode: "0644"
     content: "{{ docker_rootless_daemon_json }}"
   when: docker_rootless_daemon_json is defined
-  notify: Restart rootless docker
+  notify: Restart rootless container runtime
 
 - name: Delete ~/.config/docker/daemon.json
   ansible.builtin.file:
     path: "{{ docker_rootless_user.home }}/.config/docker/daemon.json"
     state: absent
   when: docker_rootless_daemon_json is not defined
-  notify: Restart rootless docker
+  notify: Restart rootless container runtime
 
 - name: Flush handlers
   meta: flush_handlers
